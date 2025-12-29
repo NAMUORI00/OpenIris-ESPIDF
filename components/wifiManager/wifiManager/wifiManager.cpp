@@ -355,10 +355,24 @@ void WiFiManager::TryConnectToStoredNetworks()
 
 void WiFiManager::Begin()
 {
+  // Check if already initialized
+  static bool s_wifi_initialized = false;
+  if (s_wifi_initialized) {
+    ESP_LOGW(WIFI_MANAGER_TAG, "WiFi already initialized, skipping Begin()");
+    return;
+  }
+  s_wifi_initialized = true;
+
   s_wifi_event_group = xEventGroupCreate();
 
   ESP_ERROR_CHECK(esp_netif_init());
-  ESP_ERROR_CHECK(esp_event_loop_create_default());
+  
+  // Check if event loop already exists
+  esp_err_t err = esp_event_loop_create_default();
+  if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+    ESP_ERROR_CHECK(err);
+  }
+  
   auto netif = esp_netif_create_default_wifi_sta();
 
   wifi_init_config_t esp_wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();

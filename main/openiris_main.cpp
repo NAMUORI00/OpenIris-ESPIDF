@@ -121,6 +121,8 @@ void launch_streaming()
     {
         // we're still in setup, the user didn't select anything yet, let's give a bit of time for them to make a choice
         ESP_LOGI("[MAIN]", "No mode was selected, staying in SETUP mode. WiFi streaming will be enabled still. \nPlease select another mode if you'd like.");
+        // Start WiFi mode anyway so users can access the device and configure it
+        startWiFiMode();
     }
     else
     {
@@ -222,8 +224,8 @@ void startWiFiMode()
     mdnsManager.start();
     restAPI->begin();
     StreamingMode mode = deviceConfig->getDeviceMode();
-    // don't enable in SETUP mode
-    if (mode == StreamingMode::WIFI)
+    // Start stream server in both WIFI and SETUP modes
+    if (mode == StreamingMode::WIFI || mode == StreamingMode::SETUP)
     {
         streamServer.startStreamServer();
     }
